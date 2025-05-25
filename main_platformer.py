@@ -1,7 +1,7 @@
 import pygame
 import sys
 
-from main import get_ADC
+from utils import get_ADC, button_pressed, platformer_pressed, read_gpio_input
 from settings import *
 from world import World
 
