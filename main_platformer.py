@@ -13,7 +13,7 @@ pygame.display.set_caption("Raspberry Pi Console")
 JOYSTICK_CENTER = 114
 JOYSTICK_THRESHOLD = 20
 class Platformer:
-    def __init__(self, screen, width, height, button_pressed):
+    def __init__(self, screen, width, height, button_pressed, get_ADC):
         self.screen = screen
         self.clock = pygame.time.Clock()
         self.button_pressed = button_pressed
