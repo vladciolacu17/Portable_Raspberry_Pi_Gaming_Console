@@ -220,6 +220,6 @@ while True:
     if selected_game == "Snake":
         snake_game()
     elif selected_game == "Platformer":
-        start_platformer(screen, platformer_pressed)
+        start_platformer(screen, platformer_pressed, get_ADC)
     elif selected_game == "Tetris":
         tetris_game()
