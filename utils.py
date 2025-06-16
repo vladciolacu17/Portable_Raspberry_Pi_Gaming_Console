@@ -3,7 +3,7 @@ import pygame
 
 GPIO.setmode(GPIO.BCM)
 
-PIN_CLK = 18
+PIN_CLK = 23
 PIN_DO  = 16
 PIN_DI  = 20
 PIN_CS  = 24
