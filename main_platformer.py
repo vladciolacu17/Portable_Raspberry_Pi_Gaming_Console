@@ -10,7 +10,7 @@ WIDTH, HEIGHT = pygame.display.get_desktop_sizes()[0]
 print(str(HEIGHT) + " " + str(WIDTH))
 screen = pygame.display.set_mode((1920, 1080), pygame.FULLSCREEN)
 pygame.display.set_caption("Raspberry Pi Console")
-JOYSTICK_CENTER = 114
+JOYSTICK_CENTER = 129
 JOYSTICK_THRESHOLD = 20
 class Platformer:
     def __init__(self, screen, width, height, button_pressed, get_ADC):
@@ -23,9 +23,11 @@ class Platformer:
         self.bg_img = pygame.transform.scale(self.bg_img, (width, height))
 
     def _read_joystick(self):
-        # Read analog joystick values
-        x_value = self.get_ADC(0)  # Assuming channel 0 is for X-axis
-        y_value = self.get_ADC(1)  # Assuming channel 1 is for Y-axis
+        x_value = self.get_ADC(0)  # Read X-axis value
+        y_value = self.get_ADC(1)  # Read Y-axis value
+
+        # Debugging output
+        print(f"Joystick X-axis: {x_value}, Y-axis: {y_value}")
 
         # Map joystick values to directional inputs
         joystick_event = {
@@ -33,6 +35,7 @@ class Platformer:
             "right": x_value > JOYSTICK_CENTER + JOYSTICK_THRESHOLD,
             "jump": y_value < JOYSTICK_CENTER - JOYSTICK_THRESHOLD,
         }
+        print("Joystick event mapping:", joystick_event)
         return joystick_event
 
     def main(self):
@@ -45,10 +48,11 @@ class Platformer:
                     pygame.quit()
                     sys.exit()
 
+            joystick_input = self._read_joystick()
             player_event = {
-                "left": self.button_pressed("left"),
-                "jump": self.button_pressed("up"),  # GPIO5 for jumping
-				"right": self.button_pressed("right"),
+                "left": joystick_input["left"] or self.button_pressed("left"),
+                "jump": joystick_input["jump"] or self.button_pressed("up"),
+                "right": joystick_input["right"] or self.button_pressed("right"),
             }
 
             world.update(player_event)
