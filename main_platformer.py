@@ -23,9 +23,13 @@ class Platformer:
         self.bg_img = pygame.transform.scale(self.bg_img, (width, height))
 
     def _read_joystick(self):
-        # Swapped axes: use ADC(1) for X and ADC(0) for Y
-        x_value = self.get_ADC(1)  # originally Y
-        y_value = 255 - self.get_ADC(0)  # originally X, now inverted
+        # Swap axes if needed (should already be correct)
+        x_value = self.get_ADC(1)
+        y_value = self.get_ADC(0)
+
+        # Invert both axes (since screen flipped 180°)
+        x_value = 255 - x_value
+        y_value = 255 - y_value
 
         print(f"Joystick X-axis: {x_value}, Y-axis: {y_value}")
 
