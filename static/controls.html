@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Player 2 Controls</title>
+  <title>Player 2 Controls (MJPEG)</title>
 </head>
 <body>
   <h2>Player 2</h2>
 
-  <img id="gameview" width="640"><br><br>
+  <!-- MJPEG stream -->
+  <img src="/stream.mjpeg" width="640"><br><br>
 
+  <!-- Control buttons (fallback) -->
   <button onclick="sendDir('UP')">UP</button><br>
   <button onclick="sendDir('LEFT')">LEFT</button>
   <button onclick="sendDir('RIGHT')">RIGHT</button><br>
@@ -30,12 +32,6 @@
         case 'ArrowRight': sendDir('RIGHT'); break;
       }
     });
-
-    // 60 FPS stream
-    setInterval(() => {
-      const img = document.getElementById('gameview');
-      img.src = '/stream?' + performance.now(); // cache-busting timestamp
-    }, 16); // ~60fps
   </script>
 </body>
 </html>

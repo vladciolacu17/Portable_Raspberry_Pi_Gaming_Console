@@ -1,11 +1,12 @@
 import pygame
 import threading
 import random
-from flask import Flask, request, send_from_directory
+from flask import Flask, Response, request, send_from_directory
 from utils import button_pressed
 from PIL import Image
 import io
 import numpy as np
+import time
 
 app = Flask(__name__, static_url_path='', static_folder='static')
 player2_dir = 'LEFT'
@@ -21,17 +22,20 @@ def set_dir():
 def controls():
     return send_from_directory('static', 'controls.html')
 
-@app.route('/stream')
-def stream():
-    global latest_frame
-    if latest_frame is None:
-        return '', 200, {'Content-Type': 'image/jpeg'}
-    buf = io.BytesIO()
-    img = Image.fromarray(latest_frame)
-    img = img.resize((480, 360), Image.BILINEAR)
-    img.save(buf, format='JPEG', quality=80)
-    buf.seek(0)
-    return buf.read(), 200, {'Content-Type': 'image/jpeg'}
+@app.route('/stream.mjpeg')
+def mjpeg_stream():
+    def generate():
+        while True:
+            if latest_frame is not None:
+                img = Image.fromarray(latest_frame)
+                img = img.resize((480, 360), Image.BILINEAR)
+                buf = io.BytesIO()
+                img.save(buf, format='JPEG', quality=80)
+                frame = buf.getvalue()
+                yield (b'--frame\r\n'
+                       b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+            time.sleep(1 / 60)  # ~60 fps
+    return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 def run_web_server():
     app.run(host='0.0.0.0', port=5000)
@@ -76,7 +80,7 @@ def run_slither_game(get_gpio_direction=None):
     block_size = 20
     cols = screen_width // block_size
     rows = screen_height // block_size
-    pygame.display.set_caption("Slither Clone - 2 Player")
+    pygame.display.set_caption("Slither Clone - MJPEG Stream")
 
     clock = pygame.time.Clock()
     font = pygame.font.SysFont(None, 36)
@@ -181,7 +185,7 @@ def run_slither_game(get_gpio_direction=None):
 
         pygame.display.flip()
 
-        # Fast streaming (60 FPS)
+        # MJPEG-compatible frame
         screen_array = pygame.surfarray.array3d(screen)
         screen_array = np.transpose(screen_array, (1, 0, 2))
         latest_frame = screen_array
