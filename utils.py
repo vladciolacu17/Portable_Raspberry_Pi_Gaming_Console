@@ -81,3 +81,14 @@ def platformer_pressed(name):
         last_pressed[name] = current_time
         return True
     return False
+def get_gpio_direction():
+    inputs = read_gpio_input()
+    if inputs["up"]:
+        return "UP"
+    elif inputs["down"]:
+        return "DOWN"
+    elif inputs["left"]:
+        return "LEFT"
+    elif inputs["right"]:
+        return "RIGHT"
+    return None

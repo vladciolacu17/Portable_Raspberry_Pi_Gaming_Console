@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head><title>Player 2 Controls</title></head>
+<body>
+  <h2>Player 2</h2>
+  <button onclick="sendDir('UP')">UP</button><br>
+  <button onclick="sendDir('LEFT')">LEFT</button>
+  <button onclick="sendDir('RIGHT')">RIGHT</button><br>
+  <button onclick="sendDir('DOWN')">DOWN</button>
+
+  <script>
+    function sendDir(dir) {
+      fetch('/set_dir', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ dir })
+      });
+    }
+  </script>
+</body>
+</html>

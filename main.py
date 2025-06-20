@@ -5,7 +5,8 @@ import RPi.GPIO as GPIO
 import time
 import os
 from main_platformer import start_platformer
-from utils import get_ADC, button_pressed, platformer_pressed
+from slither import run_slither_game
+from utils import get_ADC, button_pressed, platformer_pressed, read_gpio_input, get_gpio_direction
 from settings import *
 
 # -------------------------
@@ -40,7 +41,7 @@ def draw_text(surface, text, x, y, color=WHITE):
 def game_menu():
     menu_running = True
     selected = 0
-    options = ["Snake", "Tetris", "Platformer", "Exit"]
+    options = ["Snake", "Tetris", "Platformer","Slither", "Exit"]
 
     while menu_running:
         screen.fill(BLACK)
@@ -233,3 +234,6 @@ while True:
         start_platformer(screen, platformer_pressed, get_ADC)
     elif selected_game == "Tetris":
         tetris_game()
+    elif selected_game == "Slither":
+        run_slither_game(get_gpio_direction)
+
