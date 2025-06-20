@@ -61,8 +61,10 @@ def game_menu():
         # Navigate menu with joystick or buttons
         if joystick_input["down"] or button_pressed("down"):
             selected = (selected + 1) % len(options)
+            pygame.time.wait(200)
         elif joystick_input["up"] or button_pressed("up"):
             selected = (selected - 1) % len(options)
+            pygame.time.wait(200)
         elif button_pressed("select"):
             if options[selected] == "Exit":
                 pygame.quit()
