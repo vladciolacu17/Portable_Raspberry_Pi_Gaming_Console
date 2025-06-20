@@ -82,14 +82,21 @@ def run_slither_game(get_gpio_direction=None):
             if keys[pygame.K_a]: snake1.direction = (-1, 0)
             if keys[pygame.K_d]: snake1.direction = (1, 0)
 
-        try:
-            dir_map = {
-                'UP': (0, -1), 'DOWN': (0, 1),
-                'LEFT': (-1, 0), 'RIGHT': (1, 0)
-            }
+        dir_map = {
+            'UP': (0, -1), 'DOWN': (0, 1),
+            'LEFT': (-1, 0), 'RIGHT': (1, 0)
+        }
+
+        # Web input (takes priority)
+        if player2_dir:
             snake2.direction = dir_map.get(player2_dir.upper(), snake2.direction)
-        except:
-            pass
+
+        # Keyboard fallback for Player 2
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_UP]:    snake2.direction = (0, -1)
+        if keys[pygame.K_DOWN]:  snake2.direction = (0, 1)
+        if keys[pygame.K_LEFT]:  snake2.direction = (-1, 0)
+        if keys[pygame.K_RIGHT]: snake2.direction = (1, 0)
 
         snake1.move()
         snake2.move()
