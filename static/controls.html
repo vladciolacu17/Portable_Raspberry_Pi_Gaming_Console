@@ -5,27 +5,28 @@
 </head>
 <body>
   <h2>Player 2</h2>
-  <p>Use arrow keys or the buttons below to move Player 2.</p>
 
+  <!-- Live game image -->
+  <img id="gameview" width="640"><br><br>
+
+  <!-- Control buttons -->
   <button onclick="sendDir('UP')">UP</button><br>
   <button onclick="sendDir('LEFT')">LEFT</button>
   <button onclick="sendDir('RIGHT')">RIGHT</button><br>
   <button onclick="sendDir('DOWN')">DOWN</button>
 
   <script>
+    // Send direction to Flask server
     function sendDir(dir) {
-      console.log("Sending:", dir); // ✅ CONFIRM this appears in Console
       fetch('/set_dir', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({ dir: dir })
       });
     }
 
+    // Arrow key support
     document.addEventListener('keydown', (event) => {
-      console.log("Key pressed:", event.key); // ✅ Should show in Console
       switch (event.key) {
         case 'ArrowUp': sendDir('UP'); break;
         case 'ArrowDown': sendDir('DOWN'); break;
@@ -33,6 +34,12 @@
         case 'ArrowRight': sendDir('RIGHT'); break;
       }
     });
+
+    // Refresh game view every 100ms
+    setInterval(() => {
+      const img = document.getElementById('gameview');
+      img.src = '/stream?' + new Date().getTime(); // cache buster
+    }, 100);
   </script>
 </body>
 </html>

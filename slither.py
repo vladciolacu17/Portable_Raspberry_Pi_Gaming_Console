@@ -3,9 +3,13 @@ import threading
 import random
 from flask import Flask, request, send_from_directory
 from utils import button_pressed
+from PIL import Image
+import io
+import numpy as np
 
 app = Flask(__name__, static_url_path='', static_folder='static')
 player2_dir = 'LEFT'
+latest_frame = None
 
 @app.route('/set_dir', methods=['POST'])
 def set_dir():
@@ -17,6 +21,17 @@ def set_dir():
 @app.route('/')
 def controls():
     return send_from_directory('static', 'controls.html')
+
+@app.route('/stream')
+def stream():
+    global latest_frame
+    if latest_frame is None:
+        return '', 200, {'Content-Type': 'image/jpeg'}
+    buf = io.BytesIO()
+    img = Image.fromarray(latest_frame)
+    img.save(buf, format='JPEG')
+    buf.seek(0)
+    return buf.read(), 200, {'Content-Type': 'image/jpeg'}
 
 def run_web_server():
     app.run(host='0.0.0.0', port=5000)
@@ -50,6 +65,8 @@ def show_game_over(screen, text, font):
     pygame.time.wait(3000)
 
 def run_slither_game(get_gpio_direction=None):
+    global latest_frame
+
     flask_thread = threading.Thread(target=run_web_server, daemon=True)
     flask_thread.start()
 
@@ -64,7 +81,7 @@ def run_slither_game(get_gpio_direction=None):
     clock = pygame.time.Clock()
     font = pygame.font.SysFont(None, 36)
 
-    # Show countdown before starting
+    # Show countdown
     for count in ["3", "2", "1", "GO!"]:
         screen.fill((0, 0, 0))
         msg = font.render(count, True, (255, 255, 255))
@@ -80,11 +97,7 @@ def run_slither_game(get_gpio_direction=None):
 
     snake1 = Snake((0, 255, 0), (5, 5))
     snake2 = Snake((0, 0, 255), (20, 15))
-
-    food_items = [
-        (random.randint(0, cols - 1), random.randint(0, rows - 1))
-        for _ in range(3)
-    ]
+    food_items = [(random.randint(0, cols - 1), random.randint(0, rows - 1)) for _ in range(3)]
 
     running = True
     while running:
@@ -94,6 +107,7 @@ def run_slither_game(get_gpio_direction=None):
             if event.type == pygame.QUIT:
                 running = False
 
+        # Player 1 input
         if get_gpio_direction:
             dir1 = get_gpio_direction()
             if dir1 == 'UP': snake1.direction = (0, -1)
@@ -107,17 +121,15 @@ def run_slither_game(get_gpio_direction=None):
             if keys[pygame.K_a]: snake1.direction = (-1, 0)
             if keys[pygame.K_d]: snake1.direction = (1, 0)
 
-        dir_map = {
-            'UP': (0, -1), 'DOWN': (0, 1),
-            'LEFT': (-1, 0), 'RIGHT': (1, 0)
-        }
+        # Player 2 input (web + keyboard)
+        dir_map = {'UP': (0, -1), 'DOWN': (0, 1), 'LEFT': (-1, 0), 'RIGHT': (1, 0)}
         if player2_dir:
             snake2.direction = dir_map.get(player2_dir.upper(), snake2.direction)
 
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_UP]:    snake2.direction = (0, -1)
-        if keys[pygame.K_DOWN]:  snake2.direction = (0, 1)
-        if keys[pygame.K_LEFT]:  snake2.direction = (-1, 0)
+        if keys[pygame.K_UP]: snake2.direction = (0, -1)
+        if keys[pygame.K_DOWN]: snake2.direction = (0, 1)
+        if keys[pygame.K_LEFT]: snake2.direction = (-1, 0)
         if keys[pygame.K_RIGHT]: snake2.direction = (1, 0)
 
         snake1.move()
@@ -131,7 +143,6 @@ def run_slither_game(get_gpio_direction=None):
                 food_items[i] = (random.randint(0, cols - 1), random.randint(0, rows - 1))
                 if food_eaten % 5 == 0:
                     speed = min(speed + 1, 30)
-
             elif snake2.body[-1] == f:
                 snake2.grow()
                 score2 += 1
@@ -173,6 +184,13 @@ def run_slither_game(get_gpio_direction=None):
         screen.blit(score_text, (10, 10))
 
         pygame.display.flip()
+
+        # Capture frame for browser stream
+        screen_array = pygame.surfarray.array3d(screen)
+        screen_array = np.rot90(screen_array, 3)
+        screen_array = np.flip(screen_array, axis=1)
+        latest_frame = screen_array
+
         clock.tick(speed)
 
     show_game_over(screen, winner, font)
