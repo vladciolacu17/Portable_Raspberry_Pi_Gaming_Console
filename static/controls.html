@@ -6,17 +6,14 @@
 <body>
   <h2>Player 2</h2>
 
-  <!-- Live game image -->
   <img id="gameview" width="640"><br><br>
 
-  <!-- Control buttons -->
   <button onclick="sendDir('UP')">UP</button><br>
   <button onclick="sendDir('LEFT')">LEFT</button>
   <button onclick="sendDir('RIGHT')">RIGHT</button><br>
   <button onclick="sendDir('DOWN')">DOWN</button>
 
   <script>
-    // Send direction to Flask server
     function sendDir(dir) {
       fetch('/set_dir', {
         method: 'POST',
@@ -25,7 +22,6 @@
       });
     }
 
-    // Arrow key support
     document.addEventListener('keydown', (event) => {
       switch (event.key) {
         case 'ArrowUp': sendDir('UP'); break;
@@ -35,11 +31,11 @@
       }
     });
 
-    // Refresh game view every 100ms
+    // 60 FPS stream
     setInterval(() => {
       const img = document.getElementById('gameview');
-      img.src = '/stream?' + new Date().getTime(); // cache buster
-    }, 100);
+      img.src = '/stream?' + performance.now(); // cache-busting timestamp
+    }, 16); // ~60fps
   </script>
 </body>
 </html>

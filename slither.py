@@ -15,7 +15,6 @@ latest_frame = None
 def set_dir():
     global player2_dir
     player2_dir = request.form['dir']
-    print("[WEB] Received direction:", player2_dir)
     return 'OK'
 
 @app.route('/')
@@ -29,7 +28,8 @@ def stream():
         return '', 200, {'Content-Type': 'image/jpeg'}
     buf = io.BytesIO()
     img = Image.fromarray(latest_frame)
-    img.save(buf, format='JPEG')
+    img = img.resize((480, 360), Image.BILINEAR)
+    img.save(buf, format='JPEG', quality=80)
     buf.seek(0)
     return buf.read(), 200, {'Content-Type': 'image/jpeg'}
 
@@ -81,7 +81,6 @@ def run_slither_game(get_gpio_direction=None):
     clock = pygame.time.Clock()
     font = pygame.font.SysFont(None, 36)
 
-    # Show countdown
     for count in ["3", "2", "1", "GO!"]:
         screen.fill((0, 0, 0))
         msg = font.render(count, True, (255, 255, 255))
@@ -107,7 +106,6 @@ def run_slither_game(get_gpio_direction=None):
             if event.type == pygame.QUIT:
                 running = False
 
-        # Player 1 input
         if get_gpio_direction:
             dir1 = get_gpio_direction()
             if dir1 == 'UP': snake1.direction = (0, -1)
@@ -121,7 +119,6 @@ def run_slither_game(get_gpio_direction=None):
             if keys[pygame.K_a]: snake1.direction = (-1, 0)
             if keys[pygame.K_d]: snake1.direction = (1, 0)
 
-        # Player 2 input (web + keyboard)
         dir_map = {'UP': (0, -1), 'DOWN': (0, 1), 'LEFT': (-1, 0), 'RIGHT': (1, 0)}
         if player2_dir:
             snake2.direction = dir_map.get(player2_dir.upper(), snake2.direction)
@@ -171,7 +168,6 @@ def run_slither_game(get_gpio_direction=None):
             running = False
 
         if button_pressed("reset"):
-            print("Reset button pressed")
             return
 
         for f in food_items:
@@ -185,10 +181,9 @@ def run_slither_game(get_gpio_direction=None):
 
         pygame.display.flip()
 
-        # Capture frame for browser stream
+        # Fast streaming (60 FPS)
         screen_array = pygame.surfarray.array3d(screen)
-        screen_array = np.rot90(screen_array, 3)
-        screen_array = np.flip(screen_array, axis=1)
+        screen_array = np.transpose(screen_array, (1, 0, 2))
         latest_frame = screen_array
 
         clock.tick(speed)
