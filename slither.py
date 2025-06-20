@@ -63,17 +63,7 @@ def run_slither_game(get_gpio_direction=None):
 
     clock = pygame.time.Clock()
     font = pygame.font.SysFont(None, 36)
-    score1, score2 = 0, 0
-    winner = ""
-    speed = 10
-    food_eaten = 0
 
-    snake1 = Snake((0, 255, 0), (5, 5))
-    snake2 = Snake((0, 0, 255), (20, 15))
-    food_items = [
-        (random.randint(0, cols - 1), random.randint(0, rows - 1))
-        for _ in range(3)
-    ]
     # Show countdown before starting
     for count in ["3", "2", "1", "GO!"]:
         screen.fill((0, 0, 0))
@@ -81,7 +71,20 @@ def run_slither_game(get_gpio_direction=None):
         screen.blit(msg, (screen.get_width() // 2 - msg.get_width() // 2,
                           screen.get_height() // 2 - msg.get_height() // 2))
         pygame.display.flip()
-        pygame.time.wait(1000)  # 1 second per count
+        pygame.time.wait(1000)
+
+    score1, score2 = 0, 0
+    winner = ""
+    speed = 10
+    food_eaten = 0
+
+    snake1 = Snake((0, 255, 0), (5, 5))
+    snake2 = Snake((0, 0, 255), (20, 15))
+
+    food_items = [
+        (random.randint(0, cols - 1), random.randint(0, rows - 1))
+        for _ in range(3)
+    ]
 
     running = True
     while running:
@@ -91,7 +94,6 @@ def run_slither_game(get_gpio_direction=None):
             if event.type == pygame.QUIT:
                 running = False
 
-        # Player 1 input (GPIO or keyboard fallback)
         if get_gpio_direction:
             dir1 = get_gpio_direction()
             if dir1 == 'UP': snake1.direction = (0, -1)
@@ -105,7 +107,6 @@ def run_slither_game(get_gpio_direction=None):
             if keys[pygame.K_a]: snake1.direction = (-1, 0)
             if keys[pygame.K_d]: snake1.direction = (1, 0)
 
-        # Player 2 input (web and keyboard)
         dir_map = {
             'UP': (0, -1), 'DOWN': (0, 1),
             'LEFT': (-1, 0), 'RIGHT': (1, 0)
@@ -122,7 +123,6 @@ def run_slither_game(get_gpio_direction=None):
         snake1.move()
         snake2.move()
 
-        # Food collision and speed increase
         for i, f in enumerate(food_items):
             if snake1.body[-1] == f:
                 snake1.grow()
@@ -143,7 +143,6 @@ def run_slither_game(get_gpio_direction=None):
         head1 = snake1.body[-1]
         head2 = snake2.body[-1]
 
-        # Collision detection
         if head1 == head2:
             winner = "Draw!"
             running = False
@@ -178,6 +177,3 @@ def run_slither_game(get_gpio_direction=None):
 
     show_game_over(screen, winner, font)
     pygame.quit()
-
-
-
