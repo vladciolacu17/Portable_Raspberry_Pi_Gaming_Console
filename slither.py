@@ -2,8 +2,8 @@ import pygame
 import threading
 import random
 from flask import Flask, request, send_from_directory
+from utils import button_pressed
 
-# --- Flask Web Server for Player 2 Input ---
 app = Flask(__name__, static_url_path='', static_folder='static')
 player2_dir = 'LEFT'
 
@@ -11,6 +11,7 @@ player2_dir = 'LEFT'
 def set_dir():
     global player2_dir
     player2_dir = request.form['dir']
+    print("[WEB] Received direction:", player2_dir)
     return 'OK'
 
 @app.route('/')
@@ -20,7 +21,6 @@ def controls():
 def run_web_server():
     app.run(host='0.0.0.0', port=5000)
 
-# --- Snake Class ---
 class Snake:
     def __init__(self, color, start_pos):
         self.body = [start_pos]
@@ -42,20 +42,30 @@ class Snake:
         for segment in self.body:
             pygame.draw.rect(screen, self.color, pygame.Rect(segment[0]*block_size, segment[1]*block_size, block_size, block_size))
 
-# --- Main Game Function ---
+def show_game_over(screen, text, font):
+    screen.fill((0, 0, 0))
+    msg = font.render(text, True, (255, 0, 0))
+    screen.blit(msg, (screen.get_width() // 2 - msg.get_width() // 2, screen.get_height() // 2))
+    pygame.display.flip()
+    pygame.time.wait(3000)
+
 def run_slither_game(get_gpio_direction=None):
     flask_thread = threading.Thread(target=run_web_server, daemon=True)
     flask_thread.start()
 
     pygame.init()
-    screen_width, screen_height = 640, 480
+    screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+    screen_width, screen_height = screen.get_size()
     block_size = 20
     cols = screen_width // block_size
     rows = screen_height // block_size
-    screen = pygame.display.set_mode((screen_width, screen_height))
     pygame.display.set_caption("Slither Clone - 2 Player")
 
     clock = pygame.time.Clock()
+    font = pygame.font.SysFont(None, 36)
+    score1, score2 = 0, 0
+    winner = ""
+
     snake1 = Snake((0, 255, 0), (5, 5))
     snake2 = Snake((0, 0, 255), (20, 15))
     food = (random.randint(0, cols-1), random.randint(0, rows-1))
@@ -68,7 +78,6 @@ def run_slither_game(get_gpio_direction=None):
             if event.type == pygame.QUIT:
                 running = False
 
-        # --- GPIO Input for Player 1 ---
         if get_gpio_direction:
             dir1 = get_gpio_direction()
             if dir1 == 'UP': snake1.direction = (0, -1)
@@ -86,12 +95,9 @@ def run_slither_game(get_gpio_direction=None):
             'UP': (0, -1), 'DOWN': (0, 1),
             'LEFT': (-1, 0), 'RIGHT': (1, 0)
         }
-
-        # Web input (takes priority)
         if player2_dir:
             snake2.direction = dir_map.get(player2_dir.upper(), snake2.direction)
 
-        # Keyboard fallback for Player 2
         keys = pygame.key.get_pressed()
         if keys[pygame.K_UP]:    snake2.direction = (0, -1)
         if keys[pygame.K_DOWN]:  snake2.direction = (0, 1)
@@ -103,16 +109,47 @@ def run_slither_game(get_gpio_direction=None):
 
         if snake1.body[-1] == food:
             snake1.grow()
+            score1 += 1
             food = (random.randint(0, cols-1), random.randint(0, rows-1))
         elif snake2.body[-1] == food:
             snake2.grow()
+            score2 += 1
             food = (random.randint(0, cols-1), random.randint(0, rows-1))
+
+        head1 = snake1.body[-1]
+        head2 = snake2.body[-1]
+
+        # Collision detection
+        if head1 == head2:
+            winner = "Draw!"
+            running = False
+        elif head1 in snake2.body:
+            winner = "Player 2 Wins!"
+            running = False
+        elif head2 in snake1.body:
+            winner = "Player 1 Wins!"
+            running = False
+        elif head1 in snake1.body[:-1] or not (0 <= head1[0] < cols and 0 <= head1[1] < rows):
+            winner = "Player 2 Wins!"
+            running = False
+        elif head2 in snake2.body[:-1] or not (0 <= head2[0] < cols and 0 <= head2[1] < rows):
+            winner = "Player 1 Wins!"
+            running = False
+
+        # Reset button
+        if button_pressed("reset"):
+            print("Reset button pressed")
+            return  # Exit to main menu
 
         pygame.draw.rect(screen, (255, 0, 0), pygame.Rect(food[0]*block_size, food[1]*block_size, block_size, block_size))
         snake1.draw(screen, block_size)
         snake2.draw(screen, block_size)
 
+        score_text = font.render(f"P1: {score1}   P2: {score2}", True, (255, 255, 255))
+        screen.blit(score_text, (10, 10))
+
         pygame.display.flip()
         clock.tick(10)
 
+    show_game_over(screen, winner, font)
     pygame.quit()
