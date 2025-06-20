@@ -53,9 +53,9 @@ def game_menu():
         pygame.display.flip()
 
         joystick_input = {
-            "up": get_ADC(1) < JOYSTICK_CENTER - JOYSTICK_THRESHOLD,
-            "down": get_ADC(1) > JOYSTICK_CENTER + JOYSTICK_THRESHOLD,
-            "select": get_ADC(0) < JOYSTICK_CENTER - JOYSTICK_THRESHOLD,
+            "up": get_ADC(0) < JOYSTICK_CENTER - JOYSTICK_THRESHOLD,
+            "down": get_ADC(0) > JOYSTICK_CENTER + JOYSTICK_THRESHOLD,
+
         }
 
         # Navigate menu with joystick or buttons
@@ -63,7 +63,7 @@ def game_menu():
             selected = (selected + 1) % len(options)
         elif joystick_input["up"] or button_pressed("up"):
             selected = (selected - 1) % len(options)
-        elif joystick_input["select"] or button_pressed("select"):
+        elif button_pressed("select"):
             if options[selected] == "Exit":
                 pygame.quit()
                 sys.exit()
