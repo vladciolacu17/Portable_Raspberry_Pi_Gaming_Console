@@ -6,6 +6,7 @@ import time
 import os
 from main_platformer import start_platformer
 from utils import get_ADC, button_pressed, platformer_pressed
+from settings import *
 
 # -------------------------
 # GPIO Setup
@@ -51,11 +52,18 @@ def game_menu():
 
         pygame.display.flip()
 
-        if button_pressed("down"):
+        joystick_input = {
+            "up": get_ADC(1) < JOYSTICK_CENTER - JOYSTICK_THRESHOLD,
+            "down": get_ADC(1) > JOYSTICK_CENTER + JOYSTICK_THRESHOLD,
+            "select": get_ADC(0) < JOYSTICK_CENTER - JOYSTICK_THRESHOLD,
+        }
+
+        # Navigate menu with joystick or buttons
+        if joystick_input["down"] or button_pressed("down"):
             selected = (selected + 1) % len(options)
-        elif button_pressed("up"):
+        elif joystick_input["up"] or button_pressed("up"):
             selected = (selected - 1) % len(options)
-        elif button_pressed("select"):
+        elif joystick_input["select"] or button_pressed("select"):
             if options[selected] == "Exit":
                 pygame.quit()
                 sys.exit()

@@ -13,3 +13,5 @@ world_map = [
 
 tile_size = 30
 WIDTH, HEIGHT = 480, 320
+JOYSTICK_CENTER = 129
+JOYSTICK_THRESHOLD = 20

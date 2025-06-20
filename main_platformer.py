@@ -10,8 +10,7 @@ WIDTH, HEIGHT = pygame.display.get_desktop_sizes()[0]
 print(str(HEIGHT) + " " + str(WIDTH))
 screen = pygame.display.set_mode((1920, 1080), pygame.FULLSCREEN)
 pygame.display.set_caption("Raspberry Pi Console")
-JOYSTICK_CENTER = 129
-JOYSTICK_THRESHOLD = 20
+
 class Platformer:
     def __init__(self, screen, width, height, button_pressed, get_ADC):
         self.screen = screen
