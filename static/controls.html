@@ -1,8 +1,12 @@
 <!DOCTYPE html>
 <html>
-<head><title>Player 2 Controls</title></head>
+<head>
+  <title>Player 2 Controls</title>
+</head>
 <body>
   <h2>Player 2</h2>
+  <p>Use arrow keys or the buttons below to move Player 2.</p>
+
   <button onclick="sendDir('UP')">UP</button><br>
   <button onclick="sendDir('LEFT')">LEFT</button>
   <button onclick="sendDir('RIGHT')">RIGHT</button><br>
@@ -10,12 +14,25 @@
 
   <script>
     function sendDir(dir) {
+      console.log("Sending:", dir); // ✅ CONFIRM this appears in Console
       fetch('/set_dir', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({ dir })
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: new URLSearchParams({ dir: dir })
       });
     }
+
+    document.addEventListener('keydown', (event) => {
+      console.log("Key pressed:", event.key); // ✅ Should show in Console
+      switch (event.key) {
+        case 'ArrowUp': sendDir('UP'); break;
+        case 'ArrowDown': sendDir('DOWN'); break;
+        case 'ArrowLeft': sendDir('LEFT'); break;
+        case 'ArrowRight': sendDir('RIGHT'); break;
+      }
+    });
   </script>
 </body>
 </html>
