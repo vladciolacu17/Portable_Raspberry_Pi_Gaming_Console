@@ -29,7 +29,7 @@ class Platformer:
 
         # Invert both axes (since screen flipped 180°)
         x_value = 255 - x_value
-        y_value = 255 - y_value
+        #y_value = 255 - y_value
 
         print(f"Joystick X-axis: {x_value}, Y-axis: {y_value}")
 
