@@ -122,7 +122,7 @@ def snake_game():
         clock.tick(speed)
 
 def tetris_game():
-    grid_size = 20
+    grid_size = 40  # Bigger blocks
     cols, rows = WIDTH // grid_size, HEIGHT // grid_size
     grid = [[BLACK for _ in range(cols)] for _ in range(rows)]
     tetrominoes = {
@@ -176,10 +176,14 @@ def tetris_game():
     score = 0
     running = True
 
+    move_delay = 100  # ms
+    last_move_time = pygame.time.get_ticks()
+
     while running:
         screen.fill(BLACK)
         fall_time += clock.get_rawtime()
         clock.tick()
+        current_time = pygame.time.get_ticks()
 
         if fall_time > 500:
             offset[1] += 1
@@ -196,23 +200,29 @@ def tetris_game():
                     return
             fall_time = 0
 
-        if button_pressed("left"):
-            offset[0] -= 1
-            if not valid_position(shape, offset):
-                offset[0] += 1
-        elif button_pressed("right"):
-            offset[0] += 1
-            if not valid_position(shape, offset):
+        if current_time - last_move_time > move_delay:
+            if button_pressed("left"):
                 offset[0] -= 1
-        elif button_pressed("down"):
-            offset[1] += 1
-            if not valid_position(shape, offset):
-                offset[1] -= 1
-        elif button_pressed("select"):
-            new_shape = rotate(shape)
-            if valid_position(new_shape, offset):
-                shape = new_shape
-        elif button_pressed("reset"):
+                if not valid_position(shape, offset):
+                    offset[0] += 1
+                last_move_time = current_time
+            elif button_pressed("right"):
+                offset[0] += 1
+                if not valid_position(shape, offset):
+                    offset[0] -= 1
+                last_move_time = current_time
+            elif button_pressed("down"):
+                offset[1] += 1
+                if not valid_position(shape, offset):
+                    offset[1] -= 1
+                last_move_time = current_time
+            elif button_pressed("select"):
+                new_shape = rotate(shape)
+                if valid_position(new_shape, offset):
+                    shape = new_shape
+                last_move_time = current_time
+
+        if button_pressed("reset"):
             return
 
         draw_grid()
@@ -223,6 +233,7 @@ def tetris_game():
 
         draw_text(screen, f"Score: {score}", WIDTH - 120, 10)
         pygame.display.flip()
+
 
 # Main loop
 while True:
