@@ -26,17 +26,29 @@ def controls():
 @app.route('/stream.mjpeg')
 def mjpeg_stream():
     def generate():
+        last_time = time.time()
+        target_fps = 60
+        min_delay = 1 / target_fps
         while True:
+            current_time = time.time()
+            elapsed = current_time - last_time
+            if elapsed < min_delay:
+                time.sleep(min_delay - elapsed)
+            last_time = time.time()
+
             if latest_frame is not None:
-                img = Image.fromarray(latest_frame)
-                img = img.resize((480, 360), Image.BILINEAR)
-                buf = io.BytesIO()
-                img.save(buf, format='JPEG', quality=80)
-                frame = buf.getvalue()
-                yield (b'--frame\r\n'
-                       b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-            time.sleep(1 / 60)
+                try:
+                    img = Image.fromarray(latest_frame)
+                    img = img.resize((320, 240), Image.BILINEAR)
+                    buf = io.BytesIO()
+                    img.save(buf, format='JPEG', quality=65, optimize=True)
+                    frame = buf.getvalue()
+                    yield (b'--frame\r\n'
+                           b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+                except Exception as e:
+                    print("[STREAM ERROR]", e)
     return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
 
 def start_flask_server():
     global flask_started
