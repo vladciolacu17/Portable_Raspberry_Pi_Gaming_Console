@@ -8,15 +8,14 @@ from main_platformer import start_platformer
 from slither import run_slither_game
 from utils import get_ADC, button_pressed, platformer_pressed, read_gpio_input, get_gpio_direction
 from settings import *
+from slither import run_slither_game, start_flask_server
 
-# -------------------------
-# GPIO Setup
-# -------------------------
 
 
 
 # Initialize pygame
 pygame.init()
+start_flask_server()
 
 # Screen dimensions
 WIDTH, HEIGHT = pygame.display.get_desktop_sizes()[0]

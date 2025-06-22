@@ -11,6 +11,7 @@ import time
 app = Flask(__name__, static_url_path='', static_folder='static')
 player2_dir = 'LEFT'
 latest_frame = None
+flask_started = False
 
 @app.route('/set_dir', methods=['POST'])
 def set_dir():
@@ -37,8 +38,12 @@ def mjpeg_stream():
             time.sleep(1 / 60)
     return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
-def run_web_server():
-    app.run(host='0.0.0.0', port=5000)
+def start_flask_server():
+    global flask_started
+    if not flask_started:
+        flask_started = True
+        flask_thread = threading.Thread(target=lambda: app.run(host='0.0.0.0', port=5000), daemon=True)
+        flask_thread.start()
 
 class Snake:
     def __init__(self, color, start_pos):
@@ -61,18 +66,26 @@ class Snake:
         for segment in self.body:
             pygame.draw.rect(screen, self.color, pygame.Rect(segment[0]*block_size, segment[1]*block_size, block_size, block_size))
 
-def show_game_over(screen, text, font):
+def update_stream(screen):
+    global latest_frame
+    screen_array = pygame.surfarray.array3d(screen)
+    screen_array = np.transpose(screen_array, (1, 0, 2))
+    latest_frame = screen_array
+
+def show_center_message(screen, text, font, color=(255, 255, 255), duration=1000):
     screen.fill((0, 0, 0))
-    msg = font.render(text, True, (255, 0, 0))
-    screen.blit(msg, (screen.get_width() // 2 - msg.get_width() // 2, screen.get_height() // 2))
+    msg = font.render(text, True, color)
+    screen.blit(msg, (screen.get_width() // 2 - msg.get_width() // 2,
+                      screen.get_height() // 2 - msg.get_height() // 2))
     pygame.display.flip()
-    pygame.time.wait(3000)
+    update_stream(screen)
+    pygame.time.wait(duration)
+
+def show_game_over(screen, text, font):
+    show_center_message(screen, text, font, (255, 0, 0), 3000)
 
 def run_slither_game(get_gpio_direction=None):
     global latest_frame
-
-    flask_thread = threading.Thread(target=run_web_server, daemon=True)
-    flask_thread.start()
 
     pygame.init()
     screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
@@ -86,12 +99,7 @@ def run_slither_game(get_gpio_direction=None):
     font = pygame.font.SysFont(None, 36)
 
     for count in ["3", "2", "1", "GO!"]:
-        screen.fill((0, 0, 0))
-        msg = font.render(count, True, (255, 255, 255))
-        screen.blit(msg, (screen.get_width() // 2 - msg.get_width() // 2,
-                          screen.get_height() // 2 - msg.get_height() // 2))
-        pygame.display.flip()
-        pygame.time.wait(1000)
+        show_center_message(screen, count, font)
 
     score1, score2 = 0, 0
     winner = ""
@@ -184,12 +192,10 @@ def run_slither_game(get_gpio_direction=None):
         screen.blit(score_text, (10, 10))
 
         pygame.display.flip()
-
-        screen_array = pygame.surfarray.array3d(screen)
-        screen_array = np.transpose(screen_array, (1, 0, 2))
-        latest_frame = screen_array
+        update_stream(screen)
 
         clock.tick(speed)
 
     show_game_over(screen, winner, font)
     pygame.quit()
+    return
