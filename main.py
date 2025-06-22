@@ -40,7 +40,8 @@ def draw_text(surface, text, x, y, color=WHITE):
 def game_menu():
     menu_running = True
     selected = 0
-    options = ["Snake", "Tetris", "Platformer","Slither", "Exit"]
+    options = ["Snake", "Tetris", "Platformer", "Slither", "Exit to Desktop", "Shutdown"]
+
 
     while menu_running:
         screen.fill(BLACK)
@@ -66,8 +67,12 @@ def game_menu():
             selected = (selected - 1) % len(options)
             pygame.time.wait(200)
         elif button_pressed("select"):
-            if options[selected] == "Exit":
+            if options[selected] == "Exit to Desktop":
                 pygame.quit()
+                sys.exit()
+            elif options[selected] == "Shutdown":
+                pygame.quit()
+                os.system("sudo shutdown now")
                 sys.exit()
             return options[selected]
 
