@@ -34,7 +34,7 @@ def mjpeg_stream():
                 frame = buf.getvalue()
                 yield (b'--frame\r\n'
                        b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-            time.sleep(1 / 60)  # ~60 fps
+            time.sleep(1 / 60)
     return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 def run_web_server():
@@ -185,7 +185,6 @@ def run_slither_game(get_gpio_direction=None):
 
         pygame.display.flip()
 
-        # MJPEG-compatible frame
         screen_array = pygame.surfarray.array3d(screen)
         screen_array = np.transpose(screen_array, (1, 0, 2))
         latest_frame = screen_array
