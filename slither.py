@@ -197,5 +197,5 @@ def run_slither_game(get_gpio_direction=None):
         clock.tick(speed)
 
     show_game_over(screen, winner, font)
-    pygame.quit()
+    latest_frame= None
     return
