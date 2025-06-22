@@ -41,7 +41,7 @@ def mjpeg_stream():
                     img = Image.fromarray(latest_frame)
                     img = img.resize((320, 240), Image.BILINEAR)
                     buf = io.BytesIO()
-                    img.save(buf, format='JPEG', quality=65, optimize=True)
+                    img.save(buf, format='JPEG', quality=80, optimize=True)
                     frame = buf.getvalue()
                     yield (b'--frame\r\n'
                            b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
