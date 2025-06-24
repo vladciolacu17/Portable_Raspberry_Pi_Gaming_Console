@@ -94,8 +94,8 @@ def snake_game():
         joystick_input = {
             "up": get_ADC(0) < JOYSTICK_CENTER - JOYSTICK_THRESHOLD,  # Adjust ADC channel as per your wiring
             "down": get_ADC(0) > JOYSTICK_CENTER + JOYSTICK_THRESHOLD,
-            "left": get_ADC(1) < JOYSTICK_CENTER - JOYSTICK_THRESHOLD,
-            "right": get_ADC(1) > JOYSTICK_CENTER + JOYSTICK_THRESHOLD
+            "left": get_ADC(1) > JOYSTICK_CENTER - JOYSTICK_THRESHOLD,
+            "right": get_ADC(1) < JOYSTICK_CENTER + JOYSTICK_THRESHOLD
         }
         if (button_pressed("up") or joystick_input["up"]) and direction != (0, BLOCK_SIZE):
             direction = (0, -BLOCK_SIZE)
@@ -198,8 +198,8 @@ def tetris_game():
         joystick_input = {
             "up": get_ADC(0) < JOYSTICK_CENTER - JOYSTICK_THRESHOLD,  # Adjust ADC channel as per your wiring
             "down": get_ADC(0) > JOYSTICK_CENTER + JOYSTICK_THRESHOLD,
-            "left": get_ADC(1) < JOYSTICK_CENTER - JOYSTICK_THRESHOLD,
-            "right": get_ADC(1) > JOYSTICK_CENTER + JOYSTICK_THRESHOLD
+            "left": get_ADC(1) > JOYSTICK_CENTER - JOYSTICK_THRESHOLD,
+            "right": get_ADC(1) < JOYSTICK_CENTER + JOYSTICK_THRESHOLD
         }
 
         if fall_time > 500:
