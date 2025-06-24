@@ -91,13 +91,19 @@ def snake_game():
 
     while running:
         screen.fill(BLACK)
-        if button_pressed("up") and direction != (0, BLOCK_SIZE):
+        joystick_input = {
+            "up": get_ADC(0) < JOYSTICK_CENTER - JOYSTICK_THRESHOLD,  # Adjust ADC channel as per your wiring
+            "down": get_ADC(0) > JOYSTICK_CENTER + JOYSTICK_THRESHOLD,
+            "left": get_ADC(1) < JOYSTICK_CENTER - JOYSTICK_THRESHOLD,
+            "right": get_ADC(1) > JOYSTICK_CENTER + JOYSTICK_THRESHOLD
+        }
+        if (button_pressed("up") or joystick_input["up"]) and direction != (0, BLOCK_SIZE):
             direction = (0, -BLOCK_SIZE)
-        elif button_pressed("down") and direction != (0, -BLOCK_SIZE):
+        elif (button_pressed("down") or joystick_input["down"]) and direction != (0, -BLOCK_SIZE):
             direction = (0, BLOCK_SIZE)
-        elif button_pressed("left") and direction != (BLOCK_SIZE, 0):
+        elif (button_pressed("left") or joystick_input["left"]) and direction != (BLOCK_SIZE, 0):
             direction = (-BLOCK_SIZE, 0)
-        elif button_pressed("right") and direction != (-BLOCK_SIZE, 0):
+        elif (button_pressed("right") or joystick_input["right"]) and direction != (-BLOCK_SIZE, 0):
             direction = (BLOCK_SIZE, 0)
         elif button_pressed("reset"):
             return
@@ -189,6 +195,12 @@ def tetris_game():
         fall_time += clock.get_rawtime()
         clock.tick()
         current_time = pygame.time.get_ticks()
+        joystick_input = {
+            "up": get_ADC(0) < JOYSTICK_CENTER - JOYSTICK_THRESHOLD,  # Adjust ADC channel as per your wiring
+            "down": get_ADC(0) > JOYSTICK_CENTER + JOYSTICK_THRESHOLD,
+            "left": get_ADC(1) < JOYSTICK_CENTER - JOYSTICK_THRESHOLD,
+            "right": get_ADC(1) > JOYSTICK_CENTER + JOYSTICK_THRESHOLD
+        }
 
         if fall_time > 500:
             offset[1] += 1
@@ -206,17 +218,17 @@ def tetris_game():
             fall_time = 0
 
         if current_time - last_move_time > move_delay:
-            if button_pressed("left"):
+            if button_pressed("left") or joystick_input["left"]:
                 offset[0] -= 1
                 if not valid_position(shape, offset):
                     offset[0] += 1
                 last_move_time = current_time
-            elif button_pressed("right"):
+            elif button_pressed("right") or joystick_input["right"]:
                 offset[0] += 1
                 if not valid_position(shape, offset):
                     offset[0] -= 1
                 last_move_time = current_time
-            elif button_pressed("down"):
+            elif button_pressed("down") or joystick_input["down"]:
                 offset[1] += 1
                 if not valid_position(shape, offset):
                     offset[1] -= 1
