@@ -227,4 +227,15 @@ Possible future improvements include:
 - performance optimization for small displays
 
 ---
+------------------------------------------------------------
+Author
+------------------------------------------------------------
 
+Vlad-Stefan Ciolacu<br>
+GitHub: https://github.com/vladciolacu17
+
+------------------------------------------------------------
+License
+------------------------------------------------------------
+
+MIT License
