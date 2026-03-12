@@ -192,19 +192,19 @@ python3 src/main.py
 
 ### Snake
 
-![Snake](docs/screenshots/SnakeGIF.mp4)
+![Snake](docs/screenshots/SnakeGIF.gif)
 
 ### Tetris
 
-![Tetris](docs/screenshots/TetrisGIF.mp4)
+![Tetris](docs/screenshots/TetrisGIF.gif)
 
 ### Platformer
 
-![Platformer](docs/screenshots/PlatformerGIF.mp4)
+![Platformer](docs/screenshots/PlatformerGIF.gif)
 
 ### Slither
 
-![Slither](docs/screenshots/SlitherGIF.mp4)
+![Slither](docs/screenshots/SlitherGIF.gif)
 
 ---
 
